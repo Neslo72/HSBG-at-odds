@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <string.h>
+
 #include "minion.h"
 
 #define MAX_MINION 7

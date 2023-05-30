@@ -232,7 +232,7 @@ void ghastcoiler_deathrattle(Board *ally, Board *enemy, Minion *self, char death
 }
 
 
-// WHENEVER | SUMMON
+// AFTER | SUMMON
 // Ocotosari : Summon a 2/2 tentacle (it gains +2/+2 permanently after you summon a minion in combat!)
 void octosari_effect(Board *ally, Board *enemy, Minion *self, Minion *target)
 {

@@ -182,15 +182,20 @@ void Board::process_effect(unsigned short _effect, Board *enemy, Minion *m2)
     // then left to right for summoned minions.  This is still subject to change
     // if I find my effect ordering conclusion to be wrong...
 
-    // Loop through original minions
+    Minion* summons[MAX_MINION];
+    unsigned char num_summons = 0;
     for(unsigned char i = 0; i < num_minions; i++)
-        if(!minions[i].is_summon() && ((minions[i].get_effect() & _effect) == _effect))  // needs to have exact same effect
+    {
+        if(!minions[i].is_summon() && ((minions[i].get_effect() & _effect) ==_effect))
             minions[i].battle_effect(this, enemy, &minions[i], m2);
+        else if((minions[i].get_effect() & _effect) ==_effect)
+            summons[num_summons++] = minions + i;
+    }
 
-    // Loop through summons
-    for(unsigned char i = 0; i < num_minions; i++)
-        if(minions[i].is_summon() && ((minions[i].get_effect() & _effect) == _effect))  // needs to have exact same effect
-            minions[i].battle_effect(this, enemy, &minions[i], m2);
+    for(unsigned char i = 0; i < num_summons; i++)
+    {
+        summons[i]->battle_effect(this, enemy, &minions[i], m2);
+    }
 }
 
 

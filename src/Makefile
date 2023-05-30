@@ -2,6 +2,7 @@ CXX = g++
 CXXFLAGS = -g -Wall -Werror -I $(INC)
 
 TARGET = main
+PROFILE = profile
 
 INC = include
 BIN = bin
@@ -33,8 +34,20 @@ $(MINION_O) : minion.cc
 $(MINIONS_O) : beasts.cc
 	$(CXX) $(CXXFLAGS) $^ -c -o $@
 
+
+########## PROFILING ##########
+
+$(PROFILE) : $(BOARD_O) $(MINION_O) $(MINIONS_O) main.cc
+	$(CXX) $(CXXFLAGS) -pg $^ -o $@
+
+## after this, run ./profile and gprof profile gmon.out
+## to get timing statistics
+
+
 ########## CLEAN ##########
 
 clean : 
 	rm -f $(TARGET)
+	rm -f $(PROFILE)
+	rm -f gmon.out
 	rm -rf $(BIN)

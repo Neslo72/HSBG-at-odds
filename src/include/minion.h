@@ -102,6 +102,7 @@ class Minion {
         bool is_windfury() { return windfury; };
 
         // Getter for summon state
+        // This cannot be toggled
         bool is_summon() { return summon; };
 
         // Battle health made public for easy / quick changes
