@@ -1,5 +1,11 @@
+#ifndef _MINION_FACTORIES_H_
+#define _MINION_FACTORIES_H_
+
 #include "minion.h"
 #include "board.h"
+
+// Neutral creator
+Minion neutral_factory(std::string _name);
 
 // Beast creator
 Minion beast_factory(std::string _name);
@@ -27,3 +33,5 @@ Minion* quilboar_factory(std::string _name);
 
 // Naga creator
 Minion* naga_factory(std::string _name);
+
+#endif

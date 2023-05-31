@@ -37,6 +37,7 @@ void scavenging_hyena_effect(Board *ally, Board *enemy, Minion* self, Minion *di
 // Humming Bird : Your other beasts have +2 attack
 void humming_bird_effect(Board *ally, Board *enemy, Minion *self, Minion *target)
 {
+    // TODO your OTHER beasts have +2 attack (currently buffs itself)
     if((target->get_type() & BEAST) == 0)
         return;
 
@@ -71,12 +72,14 @@ void leapfrogger_deathrattle(Board *ally, Board *enemy, Minion *self, char death
     printf("Leapfrogger not done yet lmoa\n");
 }
 
-
 // AFTER | ATTACK
 // Monstrous Macaw : After this attacks, trigger another friendly minion's deathrattle
 void monstrous_macaw_effect(Board *ally, Board *enemy, Minion *self, Minion *target)
 {
     Minion* to_trigger = ally->get_random_effect(DEATHRATTLE);
+    if(to_trigger == nullptr)
+        return;
+    
     char death_idx = ally->get_minion_idx(to_trigger);
     to_trigger->deathrattle(ally, enemy, to_trigger, death_idx, nullptr);
     // TODO be careful of nullptr in deathrattles where ATTACKER is used... (leeroy)
@@ -167,6 +170,12 @@ void mama_bear_effect(Board *ally, Board *enemy, Minion *self, Minion *target)
     target->battle_health += 4;
 }
 
+// TODO this is not final and is BUGGED!!
+// It cannot buff other palescales when it should be able to buff all other than itself
+bool palescale_find(Minion* minion)
+{
+    return (minion->get_type() & BEAST) && minion->get_name() != "Palescale Crocolisk" ? true : false;
+}
 
 // AVENGE (2)
 // Palescale Crocolisk : Give another friendly beast +6/+6
@@ -180,7 +189,8 @@ void palescale_effect(Board *ally, Board *enemy, Minion *self, Minion *target)
 
     self->avenge_count = 0;
 
-    Minion* to_buff = ally->get_random_type(BEAST);
+    Minion* to_buff = ally->get_random_minion_of(palescale_find);
+    // Minion* to_buff = ally->get_random_type(BEAST);
     if(to_buff == nullptr)
         return;
     
@@ -193,6 +203,7 @@ void palescale_effect(Board *ally, Board *enemy, Minion *self, Minion *target)
 // Palescale Crocolisk : Give another friendly beast +6/+6
 void palescale_deathrattle(Board *ally, Board *enemy, Minion *self, char death_idx, Minion *attacker)
 {
+    // TODO this can buff itself when it should not :(
     Minion* to_buff = ally->get_random_type(BEAST);
     if(to_buff == nullptr)
         return;
@@ -202,7 +213,7 @@ void palescale_deathrattle(Board *ally, Board *enemy, Minion *self, char death_i
 }
 
 
-// REBORN
+// NO_EFFECT, BUT what to do on reborn resummon???
 // Sinrunner Blanchy : This is reborn with full health and enchantments
 void blanchy_effect(Board *ally, Board *enemy, Minion *self, Minion *attacker)
 {
@@ -349,7 +360,8 @@ Minion beast_factory(std::string _name)
     }
     else if(_name == "Sinrunner Blanchy")  // NOT DONE
     {
-        ret = Minion(_name, false, 5, BEAST | UNDEAD, REBORN, 3, 3);
+        ret = Minion(_name, false, 5, BEAST | UNDEAD, NO_EFFECT, 3, 3);
+        ret.toggle_reborn();
         ret.set_effect(blanchy_effect);
     }
 
@@ -364,7 +376,7 @@ Minion beast_factory(std::string _name)
         ret = Minion(_name, false, 6, BEAST, DEATHRATTLE, 7, 7);
         ret.set_deathrattle(ghastcoiler_deathrattle);
     }
-    else if(_name == "Octosari")
+    else if(_name == "Octosari, Wrap God")
     {
         ret = Minion(_name, false, 6, BEAST, AFTER | SUMMON | DEATHRATTLE, 6, 7);
         ret.set_deathrattle(octosari_deathrattle);

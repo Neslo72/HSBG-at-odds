@@ -3,7 +3,7 @@
 
 #include <string>
 
-// To be used as binary flags later for minion types
+// Minion type binary flags
 #define NEUTRAL 1 << 0
 #define BEAST 1 << 1
 #define MURLOC 1 << 2
@@ -17,17 +17,25 @@
 #define UNDEAD 1 << 10
 #define NAM 1 << 15  // NAM = Not a minion
 
-// To be used as binary flags for battle_effect calls
+
+// Minion effects binary flags
 #define NO_EFFECT 0
 #define ON_START 1 << 0
 #define BEFORE 1 << 1
 #define WHENEVER 1 << 2
 #define AFTER 1 << 3
+
 #define SUMMON 1 << 4
-#define DEATHRATTLE 1 << 5
-#define AVENGE 1 << 6
-#define ATTACK 1 << 7
-#define REBORN 1 << 8
+#define REBORN 1 << 5
+#define DEATHRATTLE 1 << 6
+#define BATTLECRY 1 << 7  // Not really used yet
+#define AVENGE 1 << 8
+#define ATTACK 1 << 9
+
+#define PLAY 1 << 10
+#define BUY 1 << 11
+#define SELL 1 << 12
+#define STAT_GAIN 1 << 13  // ??? (whelp smuggler)
 
 
 // NOTES:

@@ -11,7 +11,7 @@ Board::Board()
     for(int i = 0; i < MAX_MINION; i++) 
         minions[i] = Minion();  // initialize all to NAM
     
-    atk_idx = MAX_MINION;  // set to max so it rollsback on first get_attacker() call
+    atk_idx = 0;
     num_minions = 0;
 }
 
@@ -104,6 +104,28 @@ Minion* Board::get_random_effect(unsigned short _effect)
     for(unsigned char i = 0; i < num_minions; i++)
     {
         if((minions[i].get_effect() & _effect) == _effect) 
+        {
+            valid_minions[num_valid] = i;
+            num_valid++;
+        }
+    }
+    if(num_valid == 0)
+        return nullptr;
+    
+    return &minions[valid_minions[rand() % num_valid]];
+}
+
+
+// Get a minion meeting the criteria of the passed in func
+// CAUTION : This adds extra runtime by nature of making another function call -- 
+// better to use the hardcoded ones than this one, but this is more dynamic
+Minion* Board::get_random_minion_of(bool (*func)(Minion*)) 
+{
+    unsigned char num_valid = 0;
+    unsigned char valid_minions[num_minions];
+    for(unsigned char i = 0; i < num_minions; i++)
+    {
+        if(func(&minions[i])) 
         {
             valid_minions[num_valid] = i;
             num_valid++;
@@ -232,8 +254,9 @@ Minion* Board::get_target()
 // Get a valid attacker minion
 Minion* Board::get_attacker()
 {
-    atk_idx = (atk_idx + 1) % num_minions;
-    return &minions[atk_idx];
+    Minion* ret = &minions[atk_idx % num_minions];
+    atk_idx++;
+    return ret;
 }
 
 
@@ -265,4 +288,18 @@ void Board::print()
         printf("(%d, %d) %s, ", minions[i].battle_attack, minions[i].battle_health, minions[i].get_name().c_str());
     }
     printf("\n");
+}
+
+
+//////////// GET RANDOM OF Helpers ////////////
+
+
+bool find_deathrattle(Minion* minion)
+{
+    return minion->get_effect() & DEATHRATTLE ? true : false;
+}
+
+bool find_beast(Minion* minion)
+{
+    return minion->get_type() & BEAST ? true : false;
 }

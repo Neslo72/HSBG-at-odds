@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <iostream>
 
-#include "minion.h"
 #include "minion_factories.h"
-#include "board.h"
 
 #define MAX_DAMAGE 48
 #define SIMULATIONS 100000
 
+// Uncomment this for detailed board state printouts
+// #define SIMULATIONS 1
+// #define PRINTOUT
 
 using namespace std;
 
@@ -83,41 +84,23 @@ void make_attack(Board* ally, Board* enemy, Minion* attacker, Minion* target)
 // Main
 int main(int argc, char* argv[]) 
 {
-    // Can recursion at the highest, biggest, largest level handle
-    // storing a vector "boardstate?" at each recursion?
-    // Is this a better approach than running simulations?
-
-    // The idea with this probability calculator is not to run simulations,
-    // but to travel each possible path and tally the results
-    // Using the tallies, probabilities could be calculated
-    // Is this feasable?
-
-    // With a minion size of 64, I think we can make up to ~1,000 recusrive
-    // calls.  It seems the maximum stack size on windows is 1MB and we would
-    // have potentially 14 minions at the start of each phase.  IDK if these 
-    // calculations really mean much, there are a lot of other things happening 
-    // on the stack simultaneously
-
-    // UPDATE : I higly doubt recursion can work, the size of the board and 
-    // minion types has become quite large for recursion of all possible cases
-    // with just the baseline in place.  I think simulations can go well tho...
-    // Additionally, the total possibilities for a full board balloons way too 
-    // fast to really consider recursion possible
-
-
-    //printf("Sizes\nBoard: %ld, Minion %ld\n", sizeof(Board), sizeof(Minion));
+    // Main setsup the player's boards then runs a number of simulations based
+    // upon the SIMULATIONS define.  If PRINTOUT is defined, the board
+    // state will be printed after each attack -- Keep SIMULATIONS low if 
+    // PRINTITOUT is defined.
 
     // Randomize seed for now
+    // Set to fixed number for detailed testing
     srand(time(NULL));
 
     // Testing 1 round randomness between some beasts
-
     Minion p1_minions[MAX_MINION];
     Minion p2_minions[MAX_MINION];
 
     Board p1_init;
     Board p2_init;
 
+    // Stats setup
     unsigned int ties = 0;
     unsigned int p1_wins = 0;
     unsigned int p2_wins = 0;
@@ -127,27 +110,31 @@ int main(int argc, char* argv[])
     // p1 minion generation
     p1_minions[0] = beast_factory("Rat Pack");
     p1_minions[1] = beast_factory("Rat Pack");
-    p1_minions[2] = beast_factory("Mama Bear");
-    p1_init.add_minion_at(p1_minions, 0);
-    p1_init.add_minion_at(p1_minions + 1, 0);
-    p1_init.add_minion_at(p1_minions + 2, 99);
+    p1_minions[2] = beast_factory("Sewer Rat");
+    p1_minions[2].toggle_taunt();
+    p1_minions[3] = beast_factory("Sewer Rat");
+    p1_minions[3].toggle_taunt();
+    p1_minions[4] = beast_factory("Palescale Crocolisk");
+    p1_minions[5] = beast_factory("Palescale Crocolisk");
+    for(int i = 0; i < 5; i++)
+    {
+        p1_init.add_minion_at(p1_minions + i, i);
+    }
 
     // p2 minion generation
-    p2_minions[0] = beast_factory("Rat Pack");
-    p2_minions[0].toggle_taunt();
-    p2_minions[1] = beast_factory("Rat Pack");
-    p2_minions[2] = beast_factory("Rat Pack");
-    p2_minions[3] = beast_factory("Rat Pack");
-    p2_minions[4] = beast_factory("Scavenging Hyena");
-    p2_minions[5] = beast_factory("Scavenging Hyena");
-    //p2_minions[6] = beast_factory("Scavenging Hyena");
-    p2_init.add_minion_at(p2_minions, 0);
-    p2_init.add_minion_at(p2_minions + 1, 0);
-    p2_init.add_minion_at(p2_minions + 2, 0);
-    p2_init.add_minion_at(p2_minions + 3, 0);
-    p2_init.add_minion_at(p2_minions + 4, 99);
-    p2_init.add_minion_at(p2_minions + 5, 99);
-    //p2_init.add_minion_at(p2_minions + 6, 99);
+    p2_minions[0] = neutral_factory("Treasure Seeker Elise");
+    p2_minions[1] = beast_factory("Sewer Rat");
+    p2_minions[1].toggle_taunt();
+    p2_minions[2] = beast_factory("Sewer Rat");
+    p2_minions[2].toggle_taunt();
+    p2_minions[3] = beast_factory("Mama Bear");
+    p2_minions[4] = beast_factory("Mama Bear");
+    p2_minions[5] = beast_factory("Banana Slamma");
+    for(int i = 0; i < 5; i++)
+    {
+        p2_init.add_minion_at(p2_minions + i, i);
+    }
+
 
     // Run simulations
     // This can be turned into a function to utilize multithreading later on...
@@ -191,18 +178,30 @@ int main(int argc, char* argv[])
             }
         }
 
+        #ifdef PRINTOUT
+            if(ally == &p1)
+                printf("p1 starts!  p1 == evens\n");
+            else
+                printf("p2 starts!  p1 == odds\n");
+            int counter = 0;
+        #endif
+
         ////////////  COMBAT LOOP  ////////////
 
-        // int counter = 0;
         while(1)
         {
             // Setup minions
-            Minion* attacker = ally->get_attacker();
+            Minion* attacker = ally->get_attacker();  // Zapp case here?
             Minion* target = enemy->get_target();
 
-            //p2.print();
-            //p1.print();
-            //printf("Attack %d : ATTACKER %s TARGET %s\n", counter, attacker->get_name().c_str(), target->get_name().c_str());
+            #ifdef PRINTOUT
+                p2.print();
+                p1.print();
+                printf("Attack %d : ATTACKER %s [%d] TARGET %s [%d]\n", 
+                        counter, attacker->get_name().c_str(), ally->get_minion_idx(attacker),
+                        target->get_name().c_str(), enemy->get_minion_idx(target));
+                counter++;
+            #endif
 
             // Make attack
             make_attack(ally, enemy, attacker, target);
@@ -221,32 +220,47 @@ int main(int argc, char* argv[])
             Board* tmp = ally;
             ally = enemy;
             enemy = tmp;
-            // counter++;
         }
 
         ////////////  END COMBAT  ////////////
 
-        //printf("FINAL BOARD STATE: \n");
-        //p2.print();
-        //p1.print();
-
-        if(p1.get_num_minions() == 0 && p2.get_num_minions() == 0)
-        {
-            ties++;
-            //printf("Draw\n");
-        }
-        else if(p2.get_num_minions() == 0) 
-        {
-            p1_wins++;
-            p1_damage[p1.get_damage(1)]++;
-            //printf("P1 wins!  P2 takes %d damage\n", p1.get_damage(5));
-        }
-        else 
-        {
-            p2_wins++;
-            p2_damage[p2.get_damage(1)]++;
-            //printf("P2 wins!  P1 takes %d damage\n", p2.get_damage(5));
-        }
+        #ifdef PRINTOUT
+            printf("FINAL BOARD STATE: \n");
+            p2.print();
+            p1.print();
+            if(p1.get_num_minions() == 0 && p2.get_num_minions() == 0)
+            {
+                ties++;
+                printf("Draw\n");
+            }
+            else if(p2.get_num_minions() == 0) 
+            {
+                p1_wins++;
+                p1_damage[p1.get_damage(1)]++;
+                printf("P1 wins!  P2 takes %d damage\n", p1.get_damage(5));
+            }
+            else 
+            {
+                p2_wins++;
+                p2_damage[p2.get_damage(1)]++;
+                printf("P2 wins!  P1 takes %d damage\n", p2.get_damage(5));
+            }
+        #else
+            if(p1.get_num_minions() == 0 && p2.get_num_minions() == 0)
+            {
+                ties++;
+            }
+            else if(p2.get_num_minions() == 0) 
+            {
+                p1_wins++;
+                p1_damage[p1.get_damage(1)]++;
+            }
+            else 
+            {
+                p2_wins++;
+                p2_damage[p2.get_damage(1)]++;
+            }
+        #endif
     }
 
     printf("End of simulation\n");
@@ -293,7 +307,6 @@ int main(int argc, char* argv[])
         p1_avg_damage /= p1_wins;
     else
         p1_avg_damage = 0;
-
     if(p2_wins)
         p2_avg_damage /= p2_wins;
     else 

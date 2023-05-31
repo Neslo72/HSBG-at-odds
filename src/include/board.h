@@ -35,6 +35,10 @@ class Board {
         // Get a random minion of a specified effect
         Minion* get_random_effect(unsigned short _effect);
 
+        // Get a minion meeting the criteria of the passed in func
+        // HELPER functions included below the Board class !
+        Minion* get_random_minion_of(bool (*func)(Minion*));
+
         // Get the index of a minion on the board
         char get_minion_idx(Minion* minion);
 
@@ -77,5 +81,13 @@ class Board {
         // Store dead minions
         // std::vector<Minion*> graveyard;  // will I need this?  I think maybe so...
 };
+
+
+//////////// GET RANDOM OF Helpers ////////////
+
+
+bool find_deathrattle(Minion* minion);
+
+bool find_beast(Minion* minion);
 
 #endif
